@@ -6,6 +6,10 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import com.jadescript.oplmod.automation.AutomationManager;
 
+/**
+ * Main OPL Automation Suite GUI
+ * Controls fishing, gardening, and other macros
+ */
 public class AutomationScreen extends Screen {
 
 	private AutomationManager automationManager;
@@ -44,11 +48,22 @@ public class AutomationScreen extends Screen {
 		).pos(centerX - 80, startY).width(160).build());
 
 		startY += spacing;
+		String fishingStatus = automationManager.isFishingActive() ? "STOP Fishing" : "START Fishing";
 		this.addRenderableWidget(Button.builder(
-			Component.literal("Fishing Macro"),
+			Component.literal(fishingStatus),
 			button -> {
-				if (isActive) automationManager.startFishing();
+				if (automationManager.isFishingActive()) {
+					automationManager.stopAll();
+				} else if (isActive) {
+					automationManager.startFishing();
+				}
 			}
+		).pos(centerX - 80, startY).width(160).build());
+
+		startY += spacing;
+		this.addRenderableWidget(Button.builder(
+			Component.literal("Fishing Stats"),
+			button -> this.minecraft.setScreen(new FishingStatsScreen(this))
 		).pos(centerX - 80, startY).width(160).build());
 
 		startY += spacing;

@@ -1,27 +1,27 @@
 package com.jadescript.oplmod.automation;
 
 import net.minecraft.client.Minecraft;
-import com.jadescript.oplmod.config.ConfigManager;
-import java.util.Timer;
-import java.util.TimerTask;
 
+/**
+ * Central automation manager for OPL Mod
+ * Handles fishing, gardening, and other macros
+ */
 public class AutomationManager {
 
 	private static AutomationManager instance;
-
 	private Minecraft client;
-	private Timer automationTimer;
+	private FishingMacro fishingMacro;
 	private boolean isActive = false;
-	private AutomationType currentType = AutomationType.NONE;
-	private ConfigManager configManager;
 
 	public enum AutomationType {
 		NONE, FISHING, GARDENING
 	}
 
+	private AutomationType currentType = AutomationType.NONE;
+
 	private AutomationManager() {
 		this.client = Minecraft.getInstance();
-		this.configManager = ConfigManager.getInstance();
+		this.fishingMacro = new FishingMacro(client);
 	}
 
 	public static AutomationManager getInstance() {
@@ -33,86 +33,74 @@ public class AutomationManager {
 
 	public void setActive(boolean active) {
 		this.isActive = active;
-		if (!active && automationTimer != null) {
-			automationTimer.cancel();
-			automationTimer = null;
+		if (!active) {
+			stopAll();
 		}
 	}
 
 	public void startFishing() {
 		if (isActive && currentType != AutomationType.FISHING) {
-			stop();
+			stopAll();
 			currentType = AutomationType.FISHING;
-			startAutomation();
+			fishingMacro.start();
 		}
 	}
 
 	public void startGardening() {
 		if (isActive && currentType != AutomationType.GARDENING) {
-			stop();
+			stopAll();
 			currentType = AutomationType.GARDENING;
-			startAutomation();
+			// Garden automation (can be added later)
 		}
 	}
 
-	private void startAutomation() {
-		if (automationTimer != null) {
-			automationTimer.cancel();
+	public void stopAll() {
+		if (fishingMacro != null) {
+			fishingMacro.stop();
 		}
-
-		automationTimer = new Timer("OPL-Automation", true);
-
-		switch (currentType) {
-			case FISHING:
-				int fishingCooldown = configManager.getCooldown();
-				automationTimer.scheduleAtFixedRate(new TimerTask() {
-					@Override
-					public void run() {
-						executeFishing();
-					}
-				}, 100, fishingCooldown);
-				break;
-
-			case GARDENING:
-				int gardenCooldown = configManager.getCooldown() + 300;
-				automationTimer.scheduleAtFixedRate(new TimerTask() {
-					@Override
-					public void run() {
-						executeGardening();
-					}
-				}, 100, gardenCooldown);
-				break;
-
-			default:
-				break;
-		}
-	}
-
-	private void executeFishing() {
-		if (client.player == null) return;
-		try {
-			Thread.sleep(configManager.getReactionDelay());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-	}
-
-	private void executeGardening() {
-		if (client.player == null) return;
-		try {
-			Thread.sleep(configManager.getReactionDelay());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+		currentType = AutomationType.NONE;
 	}
 
 	public void stop() {
-		if (automationTimer != null) {
-			automationTimer.cancel();
-			automationTimer = null;
-		}
+		stopAll();
 		isActive = false;
-		currentType = AutomationType.NONE;
+	}
+
+	// Fishing statistics
+	public int getFishingCatches() {
+		return fishingMacro != null ? fishingMacro.getTotalCatches() : 0;
+	}
+
+	public int getFishingCommon() {
+		return fishingMacro != null ? fishingMacro.getCommonCatches() : 0;
+	}
+
+	public int getFishingUncommon() {
+		return fishingMacro != null ? fishingMacro.getUncommonCatches() : 0;
+	}
+
+	public int getFishingRare() {
+		return fishingMacro != null ? fishingMacro.getRareCatches() : 0;
+	}
+
+	public int getFishingEpic() {
+		return fishingMacro != null ? fishingMacro.getEpicCatches() : 0;
+	}
+
+	public int getFishingLegendary() {
+		return fishingMacro != null ? fishingMacro.getLegendaryCatches() : 0;
+	}
+
+	public long getFishingTime() {
+		return fishingMacro != null ? fishingMacro.getTotalTimeSpent() : 0;
+	}
+
+	public boolean isFishingActive() {
+		return fishingMacro != null && fishingMacro.isRunning();
+	}
+
+	public FishingMacro getFishingMacro() {
+		return fishingMacro;
 	}
 
 	public boolean isActive() { return isActive; }
