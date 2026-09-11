@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "oplmod",
+  "version": "${version}",
+  "name": "OPL Automation Suite",
+  "description": "Minecraft automation mod with pixel detection and macros. Use /opl to open.",
+  "authors": ["JadeSCRIPTZ"],
+  "contact": {
+    "homepage": "https://github.com/JadeSCRIPTZ/opl-mod",
+    "sources": "https://github.com/JadeSCRIPTZ/opl-mod"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "com.jadescript.oplmod.OplModClient"
+    ]
+  },
+  "mixins": [
+    "oplmod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "1.26.2",
+    "java": ">=21"
+  }
+}
